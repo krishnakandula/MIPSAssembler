@@ -4,7 +4,11 @@ filename: .asciiz "test.txt" #file name
 textSpace: .space 1050     #space to store strings to be read
 equalStr:	.asciiz "\nThe characters are equal\n"
 spaceChar: .byte ' '
+commaChar:	.byte ','
+newLn:	.asciiz "\n"
 
+#REGISTERS :)
+#$s0 - Total iterations		$s1 - space character	$s2 - comma char	$s6 - holds method params
 .text
 	main:
 		li $v0, 13		#open the file
@@ -20,23 +24,46 @@ spaceChar: .byte ' '
 		li $v0, 14		#syscall 14 - read from file
 		syscall
 		
-		lb $t2, spaceChar	#contains the "space" character
+		lb $s1, spaceChar	#contains the "space" character
 		
 		li $t1, 0		#holds counter
 		
-	loop:	beq $t1, 30, end	#read til end of the file
-		la $a0, textSpace	#load address of the string to be printed
-		add $a0, $a0, $t1	#increment address
+		#Get the first space
+	loop:	la $a0, textSpace	#load address of the string to be printed
+		add $a0, $a0, $t1	#add displacement to addr
 		lb $a0, ($a0)		#load character
 		li $v0, 11		#syscall 11 - print character
 		syscall
 		
 		move $s6, $t1		#move iteration # to $s6
-		beq $a0, $t2, chkChar	#if the character is a space, branch
-		
-		
 		addi $t1, $t1, 1	#increment counter
-		j loop			#loop 	:-)
+		bne $a0, $s1, loop	#if the character isn't a space, then repeat
+		
+		jal chkChar		#print number of iterations
+		move $s0, $s6		#STORE iterations for opcode
+		
+		la $a0, newLn
+		li $v0, 4
+		syscall
+		
+	
+		#Get operands of R instruction
+	rLoop:	li $t3, 0		#store number of iterations for second operand
+		addi $s0, $s0, 2
+	rLoopA:	la $a0, textSpace	#load address of string	
+		add $a0, $a0, $s0 	#start at the space
+		add $a0, $a0, $t3	#add displacement for iterations
+		lb $a0, ($a0)		#load character
+		li $v0, 11		#syscall 11 - print character
+		syscall
+		
+		move $s6, $t3		#store iterations in $t6
+		addi $t3, $t3, 1	#increment counter
+		bne $a0, $s1, rLoopA	#if character isn't a space, then repeat
+		
+		jal chkChar		#print number of iterations
+		add $s0, $s0, $t3	#add to total number of iterations
+		j end
 		
 	end:	move $a0, $t0		#load file descriptor into a0
 		li $v0, 16		#syscall 16 - close file
@@ -67,7 +94,12 @@ spaceChar: .byte ' '
 		
 	#COMPARES char to space and finds the iteration
 	#@PARAM - $s6 - contains the iteration number
-	chkChar:	jal prInt	#print iteration number
-			j end
+	chkChar:	addi $sp, $sp, -4	#make space for one register
+			sw $ra, 0($sp)	#store return addr
+			jal prInt	#print iteration number
+			lw $ra, 0($sp)	#restore return addr
+			addi $sp, $sp, 4	#restore stack
+			
+			jr $ra		#jump back
 			
 	

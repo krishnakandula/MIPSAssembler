@@ -7,15 +7,16 @@
 
 .text
 	main:		
-			lb $t1, char
-			li $v0, 12
+			la $a0, str
+			li $a1, 3
+			li $v0, 8
 			syscall
-			move $t2, $v0
-			bne $t1, $t2, end
 			
+			move $a0, $v0
 			li $v0, 4
-			la $a0, out
 			syscall
+			
+			
 			
 	end:		la $a0, ending
 			li $v0, 4
