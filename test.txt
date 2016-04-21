@@ -1,2 +1,3 @@
-add $t0, $t1, $t2 
-sub $s7, $t2, $a0 
+addi $t0, $t1, 5 
+add $t1, $t2, $t3 
+and $t2, $t6, $s65 

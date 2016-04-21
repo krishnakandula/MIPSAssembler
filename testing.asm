@@ -1,26 +1,28 @@
 .data
-	char:	.byte	' '
-	input:	.space 	300
-	str:	.asciiz "#superswag"
-	out:	.asciiz "theyre equal"
-	ending:	.asciiz "program ending"
+animals:    
+a0: .asciiz    "bear"
+a1: .asciiz    "tiger"
+a2: .asciiz    "gorilla"
+a3: .asciiz    "horse"
+a4: .asciiz    "dog"
 
-.text
-	main:		
-			la $a0, str
-			li $a1, 3
-			li $v0, 8
-			syscall
-			
-			move $a0, $v0
-			li $v0, 4
-			syscall
-			
-			
-			
-	end:		la $a0, ending
-			li $v0, 4
-			syscall
-			
-			li $v0, 10
-			syscall
+# addrs is a list of the starting addresses for each of the strings
+addrs: 
+  .word a0
+  .word a1
+  .word a2
+  .word a3
+  .word a4
+  .word 0
+ 
+array:	.asciiz "test" 
+	.asciiz "poop"
+  
+  .text 
+  	la $a0, animals
+  	addi $a0, $a0, 5
+  	li $v0, 4
+  	syscall
+  	
+  	li $v0, 10
+  	syscall
