@@ -1,0 +1,101 @@
+.data
+	spaceChar: .byte ' '
+	newLn:	.byte '\n'
+	poundChar: .byte '#'
+	commaChar: .byte ','
+	nullTerm: .byte '\0'
+		
+	tokenBuffer:.space 200
+	registerArr: .asciiz "zero", "at  ", "v0  ", "v1  ", "a0  ", "a1  ", "a2  ", "a3  ", "t0  ", "t1  ", "t2  ", "t3  ", "t4  ", "t5  ", "t6  ", "t7  ", "s0  ", "s1  ", "s2  ", "s3  ", "s4  ", "s5  ", "s6  ", "s7  ", "t8  ", "t9  "
+	
+	str: .asciiz "\n Token Array: \n"
+	hi: .asciiz ":) \n"
+	
+	binArr: .space 100
+
+.text
+	# Intializing program variables 
+	addi $t7, $t7, 0 	# intialize counter
+	la $a1, tokenBuffer 	# load address of token 
+	lb $s1, spaceChar
+	lb $s2, newLn
+	lb $s3, commaChar
+	lb $s4, nullTerm
+
+	#intialize arrays
+	
+	jal getChar
+	
+	###############################################
+	# getChar - mimics Krishna's code
+	getChar:
+	li $v0, 12 		# Enter character
+	syscall			# $v0 = input char
+	move $t6, $v0		# move character to $a0
+	#addi $t0, $t0, 1
+
+	# Terminate if '#'
+	lb $t1, poundChar	# load program terminator
+	beq $t1, $t6, print 
+		
+	###############################################
+
+	# Concatenate characters
+	charCat:
+	beq $t6, $s1, isSpace 	# check for ' ' 
+	beq $t6, $s2, isNLine 	# check for '\n'
+	beq $t6, $s3, getChar 	# ignore the comma
+	addi $t7, $t7, 1	# increment counter
+	sb $t6, ($a1)		# concatenate 
+	addi $a1, $a1, 1 	# update address
+	j getChar
+	
+	# Format tokens to compare with registerArr elements
+	isSpace:
+	addi $t7, $t7, 1	# increment counter
+	sb $s1, ($a1)		# concatenate 
+	addi $a1, $a1, 1 	# update address
+	ble $t7, 3, isSpace	# rinse and repeat
+	sb $s4, ($a1)		# add null terminator
+	addi $a1, $a1, 1	# update address
+	move $t7, $zero		# clear counter
+	la $a1, tokenBuffer	# reset read location
+	j compare		# compare 
+	
+	# Tokenize last word, 
+	isNLine:
+	addi $sp, $sp, -4	# create stack
+	sw $ra, 0($sp)		# store in original $ra
+	jal isSpace		# add spaces to align
+	move $t6, $s2		# loading the '\n' character
+	sb $t6, ($a1)		# add '\n'
+	addi $a1, $a1, 1	# update address
+	lw $ra, 0($sp)		# reload original address
+	addi $sp, $sp, 4	# diffuse the stack
+	jr $ra			# return ########### In krishna's code, send it back to loop and update read location
+	
+	# Compares tokens then clears tokenBuffer
+	compare:
+	
+	
+	jr $ra
+	
+			
+	# Print Content
+	print:
+	la $a0, str 	
+	li $v0, 4
+	syscall 		# print prompt
+	la $a0, tokenBuffer	
+	li $v0, 4
+	syscall			# print formatted cat string 
+	
+	end:
+	# End Program
+	li $v0, 10
+	syscall
+
+
+#add a label for new line
+#add a label for a space
+#add jal
