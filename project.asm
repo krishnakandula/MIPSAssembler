@@ -1,5 +1,5 @@
 .data
-#filename: .asciiz "E:\Documents\\OneDrive\\Documents\\School\\Sophomore\\Spring\\CS 3340\\Semester_Project\\.test.txt" #file name
+#filename: .asciiz "E:\Documents\\OneDrive\\Documents\\School\\Sophomore\\Spring\\CS 3340\\Semester_Project\\test.txt" #file name
 filename: .asciiz "test.txt" #file name
 textSpace: .space 1050     #space to store strings to be read
 equalStr:	.asciiz "\nThe characters are equal\n"
@@ -51,14 +51,15 @@ newLn:	.asciiz "\n"
 		li $v0, 4
 		syscall
 	
-		jal rLoopA		#REGISTER INSTRUCTION FORMAT
+		#jal rLoopA		#REGISTER INSTRUCTION FORMAT
+		jal jLoopA		#JUMP INSTRUCTION FORMAT
 		
 		la $a0, newLn		#print line break
 		li $v0, 4	
 		syscall	
 		
-		beq $s7, 2, end
-		addi $s7, $s7, 1
+		addi $s7, $s7, 1	#increment the number of lines read
+		beq $s7, 3, end		#Number of lines to read
 		
 		move $t1, $s0
 		j loop
@@ -126,7 +127,31 @@ newLn:	.asciiz "\n"
 		addi $sp, $sp, 4	#close stack
 		jr $ra
 		
+	#JUMP INSTRUCTION FORMAT
+	#Gets the label name
+	jLoopA:	addi $sp, $sp, -4	#open stack
+		sw $ra,($sp)		#store return address
+		li $t3, 0		#store number of iterations for label
+		addi $s0, $s0, 1	#used for formatting
+	jLoopA1:
+		la $a0, textSpace	#load address of string
+		add $a0, $a0, $s0 	#start at the space
+		add $a0, $a0, $t3	#add displacement for iterations
+		lb $a0, ($a0)		#load character
+		li $v0, 11		#syscall 11 - print character
+		syscall
+		addi $t3, $t3, 1	#increment counter
+		bne $a0, $s1, jLoopA1	#if character isn't a space, then repeat
 		
+
+		add $s0, $s0, $t3	#add to total number of iterations
+		move $s6, $s0		#move number of iterations to parameter register
+		jal prInt		#print number of iterations
+		
+		lw $ra, 0($sp)		#restore return address
+		addi $sp, $sp, 4	#close stack
+		jr $ra
+	
 	end:	move $a0, $t0		#load file descriptor into a0
 		li $v0, 16		#syscall 16 - close file
 		syscall
