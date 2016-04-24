@@ -1,0 +1,46 @@
+#DecimalToBinary
+.data
+characterZero:	.byte	'0'
+characterOne:	.byte	'1'
+.text
+	DTBmain:	addi $sp, $sp, -4 		#open stack
+			sw $ra, ($sp)			#store return address
+			li $s6, 5			#parameter that contains decimal number
+			li $t1, 2			#stores the base
+			li $t2, 0			#contains the counter
+			li $t3, 16			#number of bits
+			#addi $t3, $t3, 1		#formatting
+			
+	DTBloop:	
+			beq $t2, $t3, DTBprint		#once 16 have been read end the code
+			div $s6, $s6, $t1		#divide by 2
+			mfhi $t4			#contains remainder
+			
+			addi $sp, $sp, -4		#make space for one byte
+			sw $t4, ($sp)			#store remainder into stack
+
+			addi $t2, $t2, 1		#increment counter
+			j DTBloop
+	
+	DTBend:		lw $ra, ($sp)
+			addi $sp, $sp, 4
+			li $v0, 10			#change to jr later
+			syscall
+	
+	DTBprint:	lw $s6, ($sp)			#load remainders from stack backwds
+			beq $s6, $zero, DTBprintZero
+			lb $a0, characterOne		#load character '0'
+			li $v0, 11
+			syscall
+			addi $sp, $sp, 4		#increment stack
+			addi $t2, $t2, -1		#decrement counter
+			beq $t2, 0, DTBend
+			j DTBprint
+			
+	DTBprintZero:	lb $a0, characterZero		#load character '0'
+			li $v0, 11
+			syscall
+			addi $t2, $t2, -1		#decrement counter
+			addi $sp, $sp, 4		#increment stack
+			beq $t2, 0, DTBend
+			j DTBprint

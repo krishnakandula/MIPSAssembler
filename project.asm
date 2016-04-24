@@ -4,11 +4,11 @@ filename: .asciiz "test.txt" #file name
 textSpace: .space 1050     #space to store strings to be read
 equalStr:	.asciiz "\nThe characters are equal\n"
 loopStr:	.asciiz "\nThe loop is starting\n"
-spaceChar: 	.byte ' '
-commaChar:	.byte ','
-poundChar:	.byte '#'
-newLnChar:	.byte '\n'
-newLn:	.asciiz "\n"
+spaceChar: 	.byte 	' '
+commaChar:	.byte 	','
+poundChar:	.byte 	'#'
+newLnChar:	.byte 	'\n'
+newLn:	.asciiz 	"\n"
 
 
 #REGISTERS :)
@@ -189,17 +189,17 @@ newLn:	.asciiz "\n"
 		
 	#COMPARES char to space and finds the iteration
 	#@PARAM - $s6 - contains the iteration number
-	chkChar:	addi $sp, $sp, -4	#make space for one register
-			sw $ra, 0($sp)		#store return addr
-			lb $s1, poundChar	#contains the "#" character
+	chkChar:	addi $sp, $sp, -4		#make space for one register
+			sw $ra, 0($sp)			#store return addr
+			lb $s1, poundChar		#contains the "#" character
 			beq $a0, $s1, chkComment	#if the character is a comment, branch
-			lb $s1, spaceChar	#contains the "space" character
-			bne $a0, $s1, loop	#if the character isn't a space, then repeat
-			jal prInt		#print iteration number
-			lw $ra, 0($sp)		#restore return addr
-			addi $sp, $sp, 4	#restore stack
+			lb $s1, spaceChar		#contains the "space" character
+			bne $a0, $s1, loop		#if the character isn't a space, then repeat
+			jal prInt			#print iteration number
+			lw $ra, 0($sp)			#restore return addr
+			addi $sp, $sp, 4		#restore stack
 			
-			jr $ra			#jump back
+			jr $ra				#jump back
 	
 	#CHECKS if the next character is a '#' to end the program
 	#DATA - holds byte for # in $t6		
@@ -207,6 +207,9 @@ newLn:	.asciiz "\n"
 			beq $a0, $t6, end
 			jr $ra
 	#CHECKS if character is a # and skips the next twenty characters
-	chkComment:	addi $s0, $s0, 20	#add 20 to number of characters read
-			addi $s7, $s7, 1	#increment number of lines read
+	chkComment:	addi $s0, $s0, 20		#add 20 to number of characters read
+			addi $s7, $s7, 1		#increment number of lines read
 			j loop
+	
+	#DETERMINES what instruction format to branch to
+	chkFormat:	
