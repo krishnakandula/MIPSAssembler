@@ -4,14 +4,16 @@ filename: .asciiz "test.txt" #file name
 textSpace: .space 1050     #space to store strings to be read
 equalStr:	.asciiz "\nThe characters are equal\n"
 loopStr:	.asciiz "\nThe loop is starting\n"
-spaceChar: .byte ' '
+spaceChar: 	.byte ' '
 commaChar:	.byte ','
 poundChar:	.byte '#'
+newLnChar:	.byte '\n'
 newLn:	.asciiz "\n"
 
 
 #REGISTERS :)
-#$s0 - Total iterations		$s1 - space character	$s2 - newLine char	$s6 - holds method params
+#$s0 - Total iterations		$t0 - file descriptor		$t3 - iterations for loops	$s6 - holds method params
+#$s7 - Number of lines read
 .text
 	main:	
 		li $v0, 13		#open the file
@@ -27,22 +29,22 @@ newLn:	.asciiz "\n"
 		li $v0, 14		#syscall 14 - read from file
 		syscall
 		
-		lb $s1, spaceChar	#contains the "space" character
+		#lb $s1, spaceChar	#contains the "space" character
 		
-		li $t1, 0		#number of characters read
+		li $s0, 0		#number of characters read
 		li $s7, 0		#number of lines read
 		
 		#Get the first space
 	loop:	
 		la $a0, textSpace	#load address of the string to be printed
 		
-		add $a0, $a0, $t1	#add displacement to addr
+		add $a0, $a0, $s0	#add displacement to addr
 		lb $a0, ($a0)		#load character
 		li $v0, 11		#syscall 11 - print character
 		syscall
 		
-		move $s6, $t1		#move iteration # to $s6 for parameter
-		addi $t1, $t1, 1	#increment counter
+		move $s6, $s0		#move iteration # to $s6 for parameter
+		addi $s0, $s0, 1	#increment counter
 		
 		jal chkChar		#print number of iterations
 		move $s0, $s6		#STORE iterations for opcode
@@ -51,8 +53,8 @@ newLn:	.asciiz "\n"
 		li $v0, 4
 		syscall
 	
-		#jal rLoopA		#REGISTER INSTRUCTION FORMAT
-		jal jLoopA		#JUMP INSTRUCTION FORMAT
+		jal rLoopA		#REGISTER INSTRUCTION FORMAT
+		#jal jLoopA		#JUMP INSTRUCTION FORMAT
 		
 		la $a0, newLn		#print line break
 		li $v0, 4	
@@ -61,10 +63,9 @@ newLn:	.asciiz "\n"
 		addi $s7, $s7, 1	#increment the number of lines read
 		beq $s7, 3, end		#Number of lines to read
 		
-		move $t1, $s0
 		j loop
 	
-		#REGISTER INSTRUCTION FORMAT
+		#REGISTER INSTRUCTION FORMAT and also BRANCH INSTRUCTION FORMAT
 		#Get operands of R instruction
 	rLoopA:	addi $sp, $sp, -4	#make space to store $ra
 		sw $ra, 0($sp)		#store return address
@@ -189,16 +190,23 @@ newLn:	.asciiz "\n"
 	#COMPARES char to space and finds the iteration
 	#@PARAM - $s6 - contains the iteration number
 	chkChar:	addi $sp, $sp, -4	#make space for one register
-			sw $ra, 0($sp)	#store return addr
+			sw $ra, 0($sp)		#store return addr
+			lb $s1, poundChar	#contains the "#" character
+			beq $a0, $s1, chkComment	#if the character is a comment, branch
+			lb $s1, spaceChar	#contains the "space" character
 			bne $a0, $s1, loop	#if the character isn't a space, then repeat
-			jal prInt	#print iteration number
-			lw $ra, 0($sp)	#restore return addr
+			jal prInt		#print iteration number
+			lw $ra, 0($sp)		#restore return addr
 			addi $sp, $sp, 4	#restore stack
 			
-			jr $ra		#jump back
+			jr $ra			#jump back
 	
 	#CHECKS if the next character is a '#' to end the program
 	#DATA - holds byte for # in $t6		
 	chkEnd:		lb $t6, spaceChar
 			beq $a0, $t6, end
 			jr $ra
+	#CHECKS if character is a # and skips the next twenty characters
+	chkComment:	addi $s0, $s0, 20	#add 20 to number of characters read
+			addi $s7, $s7, 1	#increment number of lines read
+			j loop
