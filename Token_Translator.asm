@@ -48,6 +48,7 @@
 	
 	jal getChar
 	
+	###### Won't need
 	###############################################
 	# getChar - mimics Krishna's code
 	getChar:
@@ -57,7 +58,7 @@
 
 		# Terminate if '#'
 		lb $t1, poundChar	# load program terminator
-		beq $t1, $t6, end
+		beq $t1, $t6, TokenTranslatorEnd
 		
 	###############################################
 
@@ -214,7 +215,9 @@
 		#la $t9, immediate		# Load address of label   ############# Pass
 		#li $t5, 5		##### Max number of chars ############# Pass
 		#j copyContents
-	
+		
+		
+###### Still working on this	
 #copyContents:
 		li $t3, 0		# char counter
 		
@@ -257,9 +260,11 @@
 		syscall 
 
 		jr $ra
-	
+		
+		
+	###### Won'r need
 	# End Program
-	end:
+	TokenTranslatorEnd:
 		li $v0, 10
 		syscall
 
