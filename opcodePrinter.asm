@@ -1,5 +1,5 @@
 .data
-		instruction: .asciiz "lbu  "
+		instruction: .asciiz "bne  "
 		array: .asciiz  
 				"add  ", "addu ", "and  ", "jr   ", "nor  ", "or   ", "slt  ", "sltu ",
 		 		"sll  ", "srl  ", "sub  ", "subu ", "addi ", "addiu", "andi ", "beq  ",
@@ -16,7 +16,9 @@
 				"000101", "100100", "100101", "110000", "001111", "100011", "001010", "001011", 
 				"101000", "101001", "101011", "000010", "000011"
 				
-		opcode: .asciiz " "
+		opcode: .asciiz " \n"
+		opcode2:	.asciiz " "
+		opcode3:	.asciiz " "
 		binaryPrompt: .asciiz "\nThe opcode is: "
 		equalStr: .asciiz "\nString found. Instruction equals instruction in array index: "
 		unequalStr: .asciiz "\nUnequal strings."
@@ -81,11 +83,38 @@ getBinary:	la $a0, binaryPrompt
 		mul $t6, $s5, $t6	#multiply this by the amount of index number of the instruction locaiton
 		add $a0, $t7, $t6 	#add the offset to the base address to get address of required opcode
 					#a0 holds address of instruction opcode
-				
+		move $t1, $a0		#move opcode
+		move $t5, $t1
 		li $v0, 4
 		syscall
+		
+		
 		#now save the Opcode into the opcode variable
 		#save .asciiz in $a0 into opcode
+		
+		lb $a0, newLn
+		li $v0, 11
+		syscall
+		
+		li $t3, 0		#counter
+
+	loop2:	la $t2, opcode
+		move $t1, $t5
+		add $t1, $t1, $t3	#add offset to array
+		add $t2, $t2, $t3	#add offset to opcode
+		
+		lb $t4, ($t1)
+		sb $t4, ($t2)
+		
+		addi $t3, $t3, 1	#increment counter
+		beq $t3, 6, End
+		#j End
+		j loop2
+		
 	
-End:		addi $v0, $0, 10 			#terminate the program
+End:		la $a0, opcode
+		li $v0, 4
+		syscall
+		
+		addi $v0, $0, 10 			#terminate the program
 		syscall
