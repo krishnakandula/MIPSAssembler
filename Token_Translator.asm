@@ -3,14 +3,16 @@
 
 	# important characters
 	spaceChar: .byte ' '
-	newLn:	.byte '\n'
+	newLnChar:	.byte '\n'
 	poundChar: .byte '#'
 	commaChar: .byte ','
 	nullTerm: .byte '\0'
+	colonChar: .byte ':'
 
 			
 	# Token Comparision 
 	tokenBuffer:.space 200
+	
 	registerArr: .asciiz "$zero", "$at  ", "$v0  ", "$v1  ", "$a0  ", "$a1  ", "$a2  ",
 			     "$a3  ", "$t0  ", "$t1  ", "$t2  ", "$t3  ", "$t4  ", "$t5  ", 
 			     "$t6  ", "$t7  ", "$s0  ", "$s1  ", "$s2  ", "$s3  ", "$s4  ", 
@@ -26,7 +28,8 @@
 	# Checking Prompts
 	equalStr: .asciiz "\nStrings are equal "
 	unequalStr: .asciiz "\nStrings aren't equal."
-	notFoundStr: .asciiz "\n You entered a label.\n"
+	notFoundStr: .asciiz "\nYou entered an immediate.\n"
+	labelStr: .asciiz "\nthe label is : "
 	
 	# Storage
 	rd: .asciiz ""
@@ -34,6 +37,7 @@
 	rt: .asciiz ""
 	label: .space 20
 	labelPC:.word
+	immediate: .asciiz ""
 
 .text
 	# Intializing program variables 
@@ -50,8 +54,6 @@
 		li $v0, 12 		# Enter character
 		syscall			# $v0 = input char
 		move $t6, $v0		# move character to $v0
-	
-		la $s6, rd
 
 		# Terminate if '#'
 		lb $t1, poundChar	# load program terminator
@@ -65,25 +67,27 @@
 		# if space ' '
 		lb $s1, spaceChar	
 		beq $t6, $s1, isSpace 
-		 
-		#else if  '\n'
-		lb $s1, newLn		
-		beq $t6, $s1, isNLine 	
 		
 		#else if ','
 		lb $s1, commaChar	
 		beq $t6, $s1, back 	# Can't concantenate commas
 		
+		# else if ':'
+		lb $s1, colonChar
+		beq $t6, $s1, isLabel
+		
 		# else, concatenate
-		addi $t7, $t7, 1	# increment counter
+		addi $t7, $t7, 1	# increment char counter
 		sb $t6, ($a1)		# concatenate char
 		addi $a1, $a1, 1 	# update address
 
 		back:
+		move $s5, $zero		# Resets check - $s5 determines if the previous char was a colon: 
 		jr $ra			# back to getChar
 	
 	# Make the token 5 characters long to compare with registerArr elements
-	isSpace:
+	isSpace: 
+		lb $s1, spaceChar
 		addi $t7, $t7, 1	# increment char counter
 		sb $s1, ($a1)		# add space char
 		addi $a1, $a1, 1 	# update r/w address
@@ -94,26 +98,52 @@
 		
 		move $t7, $zero		# clear counter
 		la $a1, tokenBuffer	# reset read/write location
-		j compare
+		beq $s5, 0, compare
+		
+		jr $ra
 	
+	# Load address
+	isLabel:
+		li $s5, 1		# sets the isColon flag to 1
 	
-	# Will not need when combined with Krishna's
-	# Tokenize last word 
-	isNLine:
 		addi $sp, $sp, -4	# create stack
 		sw $ra, 0($sp)		# store in original $ra
+		
 		jal isSpace		# add spaces to align
-		move $t6, $s2		# loading the '\n' character
-		sb $t6, ($a1)		# add '\n'
-		addi $a1, $a1, 1	# update address
+		
+		la $t1, tokenBuffer	# Load address of tokenBuffer
+		li $t3, 0		# char counter
+		la $t2, label		# Load address of label   ############# Pass
+		li $t5, 5		##### Max number of chars ############# Pass
+	
+	copLabel:
+		lb  $t4, 0($t1) 	# load byte in $t4 from tokenBuffer
+		sb $t4, 0($t2)		# store byte into label
+		addi $t3, $t3, 1	# increment counter
+		addi $t1, $t1, 1	# increment read address of tokenBuffer
+		addi $t2, $t2, 1	# increment writee address of label
+		bne $t3, $t5, copLabel 	# stop loop if we get to 5 chars
+		
+		la $a0, labelStr
+		li $v0, 4
+		syscall
+		
+		la $a0, label		#print
+		li $v0, 4
+		syscall
+		
+		lb $a0, newLnChar	# add newline character
+		li $v0, 11
+		syscall
+		
 		lw $ra, 0($sp)		# reload original address
 		addi $sp, $sp, 4	# diffuse the stack
 		
-		jr $ra			# return ########### In krishna's code, send it back to loop and update read location
-	
+		jr $ra
+
 	compare:
-		li $s1, 31				# Array Size #### Should be done in Krishna's Code
-		la $s2, registerArr			# Holds array address #### Should be done in Krishna's Code
+		li $s1, 31				# Array Size ######### Pass
+		la $s2, registerArr			# Holds array address #### Pass
 		li $s5, 0				# iterator, keeps track of array index
 		li $s6, 6				# number of char per index in the array
 	
@@ -144,36 +174,88 @@
 		li $v0, 1
 		syscall 
 		
-		lb $a0, newLn				# add newline character
+		lb $a0, newLnChar				# add newline character
 		li $v0, 11
 		syscall
 		
 		la $a0, registerBin
-		mult $s5, $s6
-		mflo $t1
-		add $a0, $a0, $t1
+		mul $t5 $s5, $s6
+		add $a0, $a0, $t5
+		
+		move $t1, $a0
 		li $v0, 4
 		syscall
 		
-		lb $a0, newLn				# add newline character
+		lb $a0, newLnChar
 		li $v0, 11
-		syscall 
+		syscall
 		
 		jr $ra
+		
+		#la $t9, rd		# Load address of label   ############# Pass
+		#li $t5, 5		##### Max number of chars ############# Pass
+		#j copyContents
 		
 	notEqual:	
 		beq $s5, $s1, notFound
 		addi $s5, $s5, 1			#increment iterator
 		addi $s2, $s2, 6			#incremement array address to access next element
 		j comLoopA1
-		
+	
+	#not found will find immediate values	
 	notFound:	
 		la $a0, notFoundStr 			#printing that strings are equal
 		li $v0, 4
 		syscall
 		
-		#la
+		jr $ra
 		
+		#la $t1, tokenBuffer	# Load address of tokenBuffer
+		#la $t9, immediate		# Load address of label   ############# Pass
+		#li $t5, 5		##### Max number of chars ############# Pass
+		#j copyContents
+	
+#copyContents:
+		li $t3, 0		# char counter
+		
+	#copy:
+		add $t1, $t3, $t1
+		add $t9, $t3, $t9 
+		lb  $t4, 0($t1) 	# load byte in $t4 from tokenBuffer
+		sb  $t4, 0($t9)		# store byte into label
+		addi $t3, $t3, 1	# increment counter
+		
+		move $a0, $t4
+		li $v0, 11
+		syscall 
+		
+		lb $a0, spaceChar
+		li $v0, 11
+		syscall 
+		
+		#bne $t3, 5, copy 	# stop loop if we get to 5 chars
+	
+	
+		move $a0, $t3
+		li $v0, 11
+		syscall
+		
+		lb $a0, newLnChar
+		li $v0, 11
+		syscall 
+		
+		la $a0, rd
+		li $v0, 4
+		syscall 
+		
+		lb $a0, newLnChar
+		li $v0, 11
+		syscall 
+
+		la $a0, tokenBuffer
+		li $v0, 4
+		syscall 
+
 		jr $ra
 	
 	# End Program
