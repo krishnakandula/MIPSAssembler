@@ -58,6 +58,7 @@ rt: .asciiz ""
 label: .space 20
 labelPC:.word
 
+smile:.asciiz ":)"
 
 #REGISTERS :)
 #$s0 - Total iterations		$t0 - file descriptor		$t3 - iterations for loops	$s6 - holds method params
@@ -118,41 +119,7 @@ labelPC:.word
 		move $t1, $s0
 		
 		j loop
-	
-			
-				
-	# Concatenate characters
-	#@PARAM - $s6 - contains the char to concatenate
-	charCat: 
-		# if space ' '
-		#lb $s1, spaceChar	
-		#beq $s6, $s1, isSpace 
-		
-		#else if ','
-		#lb $s1, commaChar	
-		#beq $s6, $s1, back 	# Can't concantenate commas
-		
-		# else if ':'
-		#lb $s1, colonChar
-		#beq $s6, $s1, isLabel
-		
-		# else, concatenate
-		addi $t7, $t7, 1	# increment char counter
-		sb $s6, ($a1)		# concatenate char
-		addi $a1, $a1, 1 	# update address
 
-		#back:
-		move $s5, $zero		# Resets check - $s5 determines if the previous char was a colon: 
-		
-		
-		move $a0, $s6
-		li $v0, 11
-		syscall
-		
-		jr $ra			# back to getChar
-	
-	
-	
 	
 		#REGISTER INSTRUCTION FORMAT and also BRANCH INSTRUCTION FORMAT
 		#Get operands of R instruction
@@ -301,35 +268,32 @@ labelPC:.word
 			j loop
 	
 	
-	
 	#DETERMINES what instruction format to branch to
 	chkFormat:
-	
 		
-			
 				
 	# Concatenate characters
 	#@PARAM - $s6 - contains the char to concatenate
-	#charCat:
+	charCat: 
 		# if space ' '
-		#lb $s1, spaceChar	
-		#beq $s6, $s1, isSpace 
+		lb $s1, spaceChar	
+		beq $s6, $s1, isSpace 
 		
 		#else if ','
-		#lb $s1, commaChar	
-		#beq $s6, $s1, back 	# Can't concantenate commas
+		lb $s1, commaChar	
+		beq $s6, $s1, back 	# if comma, don't add ir into buffer
 		
 		# else if ':'
-		#lb $s1, colonChar
-		#beq $s6, $s1, isLabel
+		lb $s1, colonChar	#
+		beq $s6, $s1, isLabel
 		
 		# else, concatenate
-		#addi $t7, $t7, 1	# increment char counter
-		#sb $s6, ($a1)		# concatenate char
-		#addi $a1, $a1, 1 	# update address
+		addi $t7, $t7, 1	# increment char counter
+		sb $s6, ($a1)		# concatenate char
+		addi $a1, $a1, 1 	# update address
 
-		#back:
-		#move $s5, $zero		# Resets check - $s5 determines if the previous char was a colon: 
+		back:
+		move $s5, $zero		# Resets check - $s5 determines if the previous char was a colon: 
 		
 		move $a0, $s6
 		li $v0, 11
@@ -339,10 +303,11 @@ labelPC:.word
 	
 	# Make the token 5 characters long to compare with registerArr elements
 	isSpace: 
+		la $a1, tokenBuffer	# load the address
+		add $a1, $a1, $t7	# update r/w address
 		lb $s1, spaceChar
-		addi $t7, $t7, 1	# increment char counter
 		sb $s1, ($a1)		# add space char
-		addi $a1, $a1, 1 	# update r/w address
+		addi $t7, $t7, 1	# increment char counter
 		ble $t7, 5, isSpace	# add another space if the string isn't 5 characters
 		
 		lb $s1, nullTerm	# load the null terminator
@@ -351,6 +316,10 @@ labelPC:.word
 		move $t7, $zero		# clear counter
 		la $a1, tokenBuffer	# reset read/write location
 		#beq $s5, 0, compare
+		
+		la $a0, smile
+		li $v0, 4
+		syscall
 		
 		
 		la $a0, tokenBuffer
@@ -403,7 +372,7 @@ labelPC:.word
 		li $s1, 29				# Array Size ######### Pass
 		la $s2, opcodeArray			# Holds array address #### Pass
 		li $s5, 0				# iterator, keeps track of array index
-		li $s6, 6				# number of char per index in the array
+		li $s6, 5				# number of char per index in the array
 	
 	comLoopA1:		
 		la $s3, 0($s2)				#load word2 address in $s3
