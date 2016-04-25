@@ -10,6 +10,8 @@ newLn:	.asciiz 	"\n"
 nullTerm: .byte '\0'
 colonChar: .byte ':'
 
+smile: .asciiz ":)\n"
+
 #opcodePrinter .data
 instruction: .asciiz "bne  "
 		instrucArr: .asciiz
@@ -61,6 +63,7 @@ instruction: .asciiz "bne  "
 	label: .space 20
 	labelPC:.word
 	immediate: .asciiz ""
+	tokenNotFoundStr:	.asciiz "\nYou entered an immediate.\n"
 ###############################################################################
 
 #REGISTERS :)
@@ -86,6 +89,7 @@ instruction: .asciiz "bne  "
 		li $s0, 0		#number of characters read
 		li $s7, 0		#number of lines read
 		
+		li $t7, 0		#counter for mandy
 		#Get the first space
 	loop:	
 		la $a0, textSpace	#load address of the string to be printed
@@ -131,7 +135,11 @@ instruction: .asciiz "bne  "
 		li $v0, 11		#syscall 11 - print character
 		syscall
 		
+		move $t6, $a0		#testing mandy's code
+		jal tokenTranslator
+		
 		addi $t3, $t3, 1	#increment counter
+		lb $s1, spaceChar
 		bne $a0, $s1, rLoopA1	#if character isn't a space, then repeat
 		
 		add $s0, $s0, $t3	#add to total number of iterations
@@ -140,7 +148,10 @@ instruction: .asciiz "bne  "
 		
 		la $s6, newLn		#print a blank line
 		jal prStr
-
+		
+	
+		j end
+		
 	rLoopB:	li $t3, 0		#store number of iterations for third operand
 	rLoopB1:	
 		la $a0, textSpace	#load address of string	
@@ -376,13 +387,24 @@ opcodePrinterEnd:
 
  # Intializing program variables 
  	tokenTranslator:
-	addi $t7, $t7, 0 	# intialize counter
+ 	addi $sp, $sp, -4	#store return address
+ 	sw $ra, ($sp)
+ 	
+ 	move $a0, $t6
+ 	li $v0, 11
+ 	syscall
+ 	
+ 	lb $a0, newLnChar
+ 	li $v0, 11
+ 	syscall
+ 	
+	#addi $t7, $t7, 0 	# intialize counter
 	la $a1, tokenBuffer 	# load address of token 
 
 	#intialize arrays
 	
-	jal getChar
-	
+	#jal getChar
+	j charCat
 	###### Won't need
 	###############################################
 	# getChar - mimics Krishna's code
@@ -400,6 +422,7 @@ opcodePrinterEnd:
 
 	# Concatenate characters
 	charCat:
+		add $a1, $a1, $t7	#update address
 		# if space ' '
 		lb $s1, spaceChar	
 		beq $t6, $s1, isSpace 
@@ -415,19 +438,30 @@ opcodePrinterEnd:
 		# else, concatenate
 		addi $t7, $t7, 1	# increment char counter
 		sb $t6, ($a1)		# concatenate char
-		addi $a1, $a1, 1 	# update address
+		#addi $a1, $a1, 1 	# update address
 
+		#la $a0, tokenBuffer
+		#li $v0, 4
+		#syscall
+		
 		back:
 		move $s5, $zero		# Resets check - $s5 determines if the previous char was a colon: 
+		
+		lw $ra, ($sp)		#get return address
+		addi $sp, $sp, 4
 		jr $ra			# back to getChar
 	
 	# Make the token 5 characters long to compare with registerArr elements
 	isSpace: 
+		la $a0, smile
+		li $v0, 4
+		syscall
+	
 		lb $s1, spaceChar
 		addi $t7, $t7, 1	# increment char counter
 		sb $s1, ($a1)		# add space char
 		addi $a1, $a1, 1 	# update r/w address
-		ble $t7, 5, isSpace	# add another space if the string isn't 5 characters
+		ble $t7, 4, isSpace	# add another space if the string isn't 5 characters
 		
 		lb $s1, nullTerm	# load the null terminator
 		sb $s1, ($a1)		# concantenate the null terminator
@@ -436,7 +470,8 @@ opcodePrinterEnd:
 		la $a1, tokenBuffer	# reset read/write location
 		beq $s5, 0, compare
 		
-		jr $ra
+		#jr $ra
+		j back
 	
 	# Load address
 	isLabel:
@@ -526,6 +561,8 @@ opcodePrinterEnd:
 		li $v0, 11
 		syscall
 		
+		lb $a0, spaceChar
+		
 		jr $ra
 		
 		#la $t9, rd		# Load address of label   ############# Pass
@@ -540,7 +577,7 @@ opcodePrinterEnd:
 	
 	#not found will find immediate values	
 	notFound:	
-		la $a0, notFoundStr 			#printing that strings are equal
+		la $a0, tokenNotFoundStr 			#printing that strings are equal
 		li $v0, 4
 		syscall
 		
