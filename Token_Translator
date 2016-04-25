@@ -10,7 +10,7 @@
 
 			
 	# Token Comparision 
-	tokenBuffer:.space 200
+	tokenBuffer:.space 20
 	registerArr: .asciiz "$zero", "$at  ", "$v0  ", "$v1  ", "$a0  ", "$a1  ", "$a2  ",
 			     "$a3  ", "$t0  ", "$t1  ", "$t2  ", "$t3  ", "$t4  ", "$t5  ", 
 			     "$t6  ", "$t7  ", "$s0  ", "$s1  ", "$s2  ", "$s3  ", "$s4  ", 
@@ -21,18 +21,18 @@
 			     "01110", "01111", "10000", "10001", "10010", "10011", "10100",
 			     "10101", "10110", "10111", "11000", "11001", "11010", "11011",
 			     "11100", "11101", "11110", "11111"
-	str: .asciiz "\n Token Array: \n"
+	str: .asciiz "\nToken Array: \n"
 	
 	# Checking Prompts
 	equalStr: .asciiz "\nStrings are equal "
 	unequalStr: .asciiz "\nStrings aren't equal."
-	notFoundStr: .asciiz "\n You entered a label.\n"
+	notFoundStr: .asciiz "\nYou entered a label.\n"
 	
 	# Storage
 	rd: .asciiz ""
 	rs: .asciiz ""
 	rt: .asciiz ""
-	label: .space 20
+	label: .asciiz ""
 	labelPC:.word
 
 .text
@@ -148,8 +148,8 @@
 		li $v0, 11
 		syscall
 		
-		la $a0, registerBin
-		mult $s5, $s6
+		la $a0, registerBin			# loading address of binary array
+		mult $s5, $s6				# find the read location
 		mflo $t1
 		add $a0, $a0, $t1
 		li $v0, 4
@@ -172,9 +172,29 @@
 		li $v0, 4
 		syscall
 		
-		#la
+		# Load address
+		la $t1, tokenBuffer	# Load address of tokenBuffer
+		la $t2, label		# Load address of label
+		li $t3, 0		# char counter
+	labelCopy:
+		lb  $t4, 0($t1) 	# load byte in $t4 from tokenBuffer
+		sb $t4, 0($t2)		# store byte into label
+		addi $t3, $t3, 1	# increment counter
+		addi $t1, $t1, 1	# increment read address of tokenBuffer
+		addi $t2, $t2, 1	# increment writee address of label
+		ble $t3, 4, labelCopy 	# stop loop if we get to 5 chars
 		
-		jr $ra
+		lb $a0, newLn				# add newline character
+		li $v0, 11
+		syscall
+		
+		la $a0, label		#print
+		li $v0, 4
+		syscall
+		
+		jr $ra	
+		
+	
 	
 	# End Program
 	end:
