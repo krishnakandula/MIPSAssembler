@@ -23,32 +23,34 @@
 		equalStr: .asciiz "\nString found. Instruction equals instruction in array index: "
 		unequalStr: .asciiz "\nUnequal strings."
 		notFoundStr: .asciiz "\nInstruction not found."
-		newLn: .byte '\n'
+		newLnChar: .byte '\n'
 .text
-
-main:		la $s0, instruction			#load word1 address
+opcodePrinter:	la $s0, instruction			#load word1 address
 		li $s1, 29				#$s1 holds 10
 		la $s2, instrucArr				#holds array address
 		li $s5, 0				#iterator, keeps track of where we are in array
 
-loop:		la $s3, 0($s2)				#load word2 address in $s3
+opcodePrinterloop:	
+		la $s3, 0($s2)				#load word2 address in $s3
 		li $t0, 0				#reset $t0 for element being compared to
 		li $t1, 0				#reset $t1 for element being compared to
 		li $t2, 0				#reset $t2 for element being compared to
 		li $t3, 0				#reset $t3 for element being compared to
 
-compare:	beq $t0, 5, equalPrint			#once the counter has reached 4, test to see if $v0 is 0 (strings are equal)
+opcodePrinterCompare:	
+		beq $t0, 5, opcodePrinterEqualPrint			#once the counter has reached 4, test to see if $v0 is 0 (strings are equal)
 
 		add $t1, $s0, $t0 			#put token (instruction) address into $t1, address($s0) + offset($t0)
 		lb  $t2, 0($t1) 			#load letter/byte at address $t1
 		add $t1, $s3, $t0 			#put array address into $t1
 		lbu $t3, 0($t1)				#load first letter of array element
 
-		bne $t2, $t3, notEqual			#...jump to notEqual if letters aren't equal, otherwise check next letter
+		bne $t2, $t3, opcodePrinterNotEqual			#...jump to notEqual if letters aren't equal, otherwise check next letter
 		addi $t0, $t0, 1 			# i = i + 1, shift to next letter
-		j compare 				# next iteration of loop
+		j opcodePrinterCompare 				# next iteration of loop
 
-equalPrint:	la $a0, equalStr 			# printing that strings are equal
+opcodePrinterEqualPrint:	
+		la $a0, equalStr 			# printing that strings are equal
 		li $v0, 4
 		syscall
 
@@ -56,24 +58,27 @@ equalPrint:	la $a0, equalStr 			# printing that strings are equal
 		li $v0 1
 		syscall
 
-		j getBinary
+		j opcodePrinterGetBinary
 
-notEqual:	la $a0, unequalStr 			# printing that strings aren't equal
+opcodePrinterNotEqual:	
+		la $a0, unequalStr 			# printing that strings aren't equal
 		li $v0, 4
 		syscall
 
-		beq $s5, $s1, notFound			#if the counter has been updated to 29 that means the instruction wasn't fuound
+		beq $s5, $s1, opcodePrinterNotFound			#if the counter has been updated to 29 that means the instruction wasn't fuound
 		addi $s5, $s5, 1			#increment iterator
 		addi $s2, $s2, 6			#incremement array address to access next element
-		j loop
+		j opcodePrinterloop
 
-notFound:	la $a0, notFoundStr 			#printing that strings are equal
+opcodePrinterNotFound:	
+		la $a0, notFoundStr 			#printing that strings are equal
 		li $v0, 4
 		syscall
-		j End
+		j opcodePrinterEnd
 
 #will use $s5 to find needed opcode
-getBinary:	la $a0, binaryPrompt
+opcodePrinterGetBinary:	
+		la $a0, binaryPrompt
 		li $v0, 4
 		syscall
 
@@ -92,13 +97,14 @@ getBinary:	la $a0, binaryPrompt
 		#now save the Opcode into the opcode variable
 		#save .asciiz in $a0 into opcode
 
-		lb $a0, newLn
+		lb $a0, newLnChar
 		li $v0, 11
 		syscall
 
 		li $t3, 0		#counter
 
-	loop2:	la $t2, opcode
+opcodePrinterloop2:	
+		la $t2, opcode
 		move $t1, $t5
 		add $t1, $t1, $t3	#add offset to array
 		add $t2, $t2, $t3	#add offset to opcode
@@ -107,12 +113,12 @@ getBinary:	la $a0, binaryPrompt
 		sb $t4, ($t2)
 
 		addi $t3, $t3, 1	#increment counter
-		beq $t3, 6, End
-		#j End
-		j loop2
+		beq $t3, 6, opcodePrinterEnd		
+		j opcodePrinterloop2
 
 
-End:		la $a0, opcode
+opcodePrinterEnd:		
+		la $a0, opcode
 		li $v0, 4
 		syscall
 
