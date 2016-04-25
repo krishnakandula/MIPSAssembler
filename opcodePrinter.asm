@@ -16,12 +16,12 @@
 				"000101", "100100", "100101", "110000", "001111", "100011", "001010", "001011", 
 				"101000", "101001", "101011", "000010", "000011"
 				
-		opcode: .asciiz " "
+		oString: .asciiz ""
 		binaryPrompt: .asciiz "\nThe opcode is: "
 		equalStr: .asciiz "\nString found. Instruction equals instruction in array index: "
 		unequalStr: .asciiz "\nUnequal strings."
 		notFoundStr: .asciiz "\nInstruction not found."
-		newLn: .byte '\n'
+		newLn: .byte ' '
 .text
 
 main:		la $s0, instruction			#load word1 address
@@ -57,8 +57,8 @@ equalPrint:	la $a0, equalStr 			# printing that strings are equal
 		j getBinary
 		
 notEqual:	la $a0, unequalStr 			# printing that strings aren't equal
-		li $v0, 4
-		syscall
+		#li $v0, 4
+		#syscall
 		
 		beq $s5, $s1, notFound			#if the counter has been updated to 29 that means the instruction wasn't fuound
 		addi $s5, $s5, 1			#increment iterator
@@ -77,15 +77,62 @@ getBinary:	la $a0, binaryPrompt
 		
 		li $a0, 0		#clear $a0
 		la $t7, opcodeArray	#get base address of the opcode array
-		li $t6, 7		#load 6 into $t6
-		mul $t6, $s5, $t6	#multiply this by the amount of index number of the instruction locaiton
+		
+		mul $t6, $s5, 7		#multiply this by the amount of index number of the instruction locaiton
 		add $a0, $t7, $t6 	#add the offset to the base address to get address of required opcode
-					#a0 holds address of instruction opcode
-				
+					#a0 holds address of instruction opcode	
+		
 		li $v0, 4
 		syscall
 		#now save the Opcode into the opcode variable
 		#save .asciiz in $a0 into opcode
+		
+		lb $a0, newLn
+		li $v0, 11
+		syscall
+		
+		la $t3, opcodeArray
+		la $t4, oString
+		mul $t6, $s5, 6	
+		add $t3, $t3, $t6
+		li $t2, 0
+				#counter
+	loop2:	
+		lb $a0, newLn
+		li $v0, 11
+		syscall
+		
+		lb $t5, ($t3)		#character from array
+		sb $t5, ($t4)		#put character into the string
+
+		move $a0, $t5
+		li $v0, 11
+		syscall
+		
+		lb $a0, newLn
+		li $v0, 11
+		syscall
 	
-End:		addi $v0, $0, 10 			#terminate the program
+		
+		addi $t2, $t2, 1
+		add $t3, $t3, $t2	#updating offset of array string
+		add $t4, $t4, $t2	#updating offset of opcode string
+		
+		beq $t2, 6, End
+		
+		j loop2
+		
+	
+End:		lb $a0, newLn
+		li $v0, 11
+		syscall
+		
+		lb $a0, newLn
+		li $v0, 11
+		syscall		
+
+		la $a0, oString
+		li $v0, 4
+		syscall
+		addi $v0, $0, 10 			#terminate the program
 		syscall

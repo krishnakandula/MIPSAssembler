@@ -182,9 +182,9 @@
 		addi $t3, $t3, 1	# increment counter
 		addi $t1, $t1, 1	# increment read address of tokenBuffer
 		addi $t2, $t2, 1	# increment writee address of label
-		ble $t3, 4, labelCopy 	# stop loop if we get to 5 chars
+		bne $t3, 6, labelCopy 	# stop loop if we get to 5 chars
 		
-		lb $a0, newLn				# add newline character
+		lb $a0, newLn		# add newline character
 		li $v0, 11
 		syscall
 		
@@ -195,9 +195,7 @@
 		jr $ra	
 		
 	
-	
 	# End Program
-	end:
-		li $v0, 10
+	end:	li $v0, 10
 		syscall
 
