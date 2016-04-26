@@ -287,7 +287,7 @@ instruction: .asciiz "bne  "
 			beq $a0, $t6, end
 			jr $ra
 	#CHECKS if character is a # and skips the next twenty characters
-	chkComment:	addi $s0, $s0, 20		#add 20 to number of characters read
+	chkComment:	addi $s0, $s0, 8		#add 20 to number of characters read
 			addi $s7, $s7, 1		#increment number of lines read
 			j loop
 
