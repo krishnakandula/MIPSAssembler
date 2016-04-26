@@ -25,7 +25,7 @@ instruction: .asciiz "bne  "
 		 		#j and jal are J-format--opcodes are 000010 and 000011 respectively
 
 		opcodeArray: .asciiz
-				"00000", "000000", "000000", "000000", "000000", "000000", "000000", "000000",
+				"000000", "000000", "000000", "000000", "000000", "000000", "000000", "000000",
 				"000000", "000000", "000000", "000000", "001000", "001001", "001100", "000100",
 				"000101", "100100", "100101", "110000", "001111", "100011", "001010", "001011",
 				"101000", "101001", "101011", "000010", "000011"
@@ -104,8 +104,8 @@ instruction: .asciiz "bne  "
 		syscall
 		move $s6, $a0		#parameter
 		move $s2, $a0
-		#lb $s1, poundChar		#contains the "#" character
-		#beq $a0, $s1, chkComment	#if the character is a comment, branch
+		lb $s1, poundChar		#contains the "#" character
+		beq $a0, $s1, chkComment	#if the character is a comment, branch
 		jal getOpCode
 		move $a0, $s2
 		move $s6, $s0		#move iteration # to $s6 for parameter
@@ -125,7 +125,7 @@ instruction: .asciiz "bne  "
 		syscall
 
 		addi $s7, $s7, 1	#increment the number of lines read
-		beq $s7, 3, end		#Number of lines to read
+		beq $s7, 4, end		#Number of lines to read
 
 		#addi $s0, $s0, 1	#Fixing the space address
 		j loop
