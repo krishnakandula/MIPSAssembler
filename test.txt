@@ -1,3 +1,3 @@
 add $t7, $s1, $a0 
-sub $t2, $a0, $s4 
+addi $t2, $a0, $s4 
 mul $t4, $a0, $s2 
