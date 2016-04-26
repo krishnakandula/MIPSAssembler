@@ -64,6 +64,7 @@ instruction: .asciiz "bne  "
 	labelPC:.word
 	immediate: .asciiz ""
 	tokenNotFoundStr:	.asciiz "\nYou entered an immediate.\n"
+	fd:.word
 ###############################################################################
 
 #REGISTERS :)
@@ -77,8 +78,9 @@ instruction: .asciiz "bne  "
 		add $a2, $zero, $zero	#file mode
 		syscall
 		
-		move $t0, $v0		#load file descriptor
+		move $t0, $v0
 		move $a0, $t0
+		
 		la $a1, textSpace	#load address of the space
 		li $a2, 1050		#read 40 characters
 		li $v0, 14		#syscall 14 - read from file
@@ -110,15 +112,14 @@ instruction: .asciiz "bne  "
 		syscall
 	
 		jal rLoopA		#REGISTER INSTRUCTION FORMAT
-
 		#jal jLoopA		#JUMP INSTRUCTION FORMAT
 		
 		la $a0, newLn		#print line break
-		li $v0, 3	
+		li $v0, 4	
 		syscall	
 		
 		addi $s7, $s7, 1	#increment the number of lines read
-		bge $s7, 3, end		#Number of lines to read
+		beq $s7, 4, end		#Number of lines to read
 		
 		j loop
 	
@@ -145,19 +146,11 @@ instruction: .asciiz "bne  "
 		
 		add $s0, $s0, $t3	#add to total number of iterations
 		move $s6, $s0
-<<<<<<< HEAD
 		
 		la $s6, newLn		#print a blank line
 		jal prStr
 		
 		
-=======
-		#jal prInt		#print number of iterations
-		
-		la $s6, newLn		#print a blank line
-		jal prStr
-	
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 	rLoopB:	li $t3, 0		#store number of iterations for third operand
 	rLoopB1:	
 		la $a0, textSpace	#load address of string	
@@ -176,14 +169,9 @@ instruction: .asciiz "bne  "
 
 		add $s0, $s0, $t3	#add to total number of iterations
 		move $s6, $s0		#move number of iterations to parameter register
-<<<<<<< HEAD
-=======
-		#jal prInt		#print number of iterations
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 		
 		la $s6, newLn		#print a blank line
 		jal prStr
-		
 		
 	rLoopC:	li $t3, 0		#store number of iterations for second operand
 	rLoopC1:	
@@ -203,18 +191,11 @@ instruction: .asciiz "bne  "
 		
 
 		add $s0, $s0, $t3	#add to total number of iterations
-<<<<<<< HEAD
 		move $s6, $s0		#move number of iterations to parameter register
-=======
-		#move $s6, $s0		#move number of iterations to parameter register
-		#jal prInt		#print number of iterations
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 		
-		lw $ra, ($sp)		#restore return address
+		lw $ra, 0($sp)		#restore return address
 		addi $sp, $sp, 4	#close stack
-		
 		jr $ra
-	
 		
 	#JUMP INSTRUCTION FORMAT
 	#Gets the label name
@@ -302,116 +283,6 @@ instruction: .asciiz "bne  "
 	#DETERMINES what instruction format to branch to
 	chkFormat:	
 
-############# - SHANE - OPCODE PRINTER - ##########################################################
-
-opcodePrinter:	
-		addi $sp, $sp, -4			#store return address in stack
-		sw $ra, ($sp)
-		la $s0, instruction			#load word1 address
-		li $s1, 29				#$s1 holds 10
-		la $s2, instrucArr				#holds array address
-		li $s5, 0				#iterator, keeps track of where we are in array
-
-opcodePrinterloop:	
-		la $s3, 0($s2)				#load word2 address in $s3
-		li $t0, 0				#reset $t0 for element being compared to
-		li $t1, 0				#reset $t1 for element being compared to
-		li $t2, 0				#reset $t2 for element being compared to
-		li $t3, 0				#reset $t3 for element being compared to
-
-opcodePrinterCompare:	
-		beq $t0, 5, opcodePrinterEqualPrint			#once the counter has reached 4, test to see if $v0 is 0 (strings are equal)
-
-		add $t1, $s0, $t0 			#put token (instruction) address into $t1, address($s0) + offset($t0)
-		lb  $t2, 0($t1) 			#load letter/byte at address $t1
-		add $t1, $s3, $t0 			#put array address into $t1
-		lbu $t3, 0($t1)				#load first letter of array element
-
-		bne $t2, $t3, opcodePrinterNotEqual			#...jump to notEqual if letters aren't equal, otherwise check next letter
-		addi $t0, $t0, 1 			# i = i + 1, shift to next letter
-		j opcodePrinterCompare 				# next iteration of loop
-
-opcodePrinterEqualPrint:	
-		la $a0, equalStr 			# printing that strings are equal
-		li $v0, 4
-		syscall
-
-		move $a0, $s5
-<<<<<<< HEAD
-		li $v0 1
-=======
-		li $v0, 1
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
-		syscall
-
-		j opcodePrinterGetBinary
-
-opcodePrinterNotEqual:	
-		la $a0, unequalStr 			# printing that strings aren't equal
-		li $v0, 4
-		syscall
-
-		beq $s5, $s1, opcodePrinterNotFound			#if the counter has been updated to 29 that means the instruction wasn't fuound
-		addi $s5, $s5, 1			#increment iterator
-		addi $s2, $s2, 6			#incremement array address to access next element
-		j opcodePrinterloop
-
-opcodePrinterNotFound:	
-		la $a0, notFoundStr 			#printing that strings are equal
-		li $v0, 4
-		syscall
-		j opcodePrinterEnd
-
-#will use $s5 to find needed opcode
-opcodePrinterGetBinary:	
-		la $a0, binaryPrompt
-		li $v0, 4
-		syscall
-
-		li $a0, 0		#clear $a0
-		la $t7, opcodeArray	#get base address of the opcode array
-		li $t6, 7		#load 6 into $t6
-		mul $t6, $s5, $t6	#multiply this by the amount of index number of the instruction locaiton
-		add $a0, $t7, $t6 	#add the offset to the base address to get address of required opcode
-					#a0 holds address of instruction opcode
-		move $t1, $a0		#move opcode
-		move $t5, $t1
-		li $v0, 4
-		syscall
-
-
-		#now save the Opcode into the opcode variable
-		#save .asciiz in $a0 into opcode
-
-		lb $a0, newLnChar
-		li $v0, 11
-		syscall
-
-		li $t3, 0		#counter
-
-opcodePrinterloop2:	
-		la $t2, opcode
-		move $t1, $t5
-		add $t1, $t1, $t3	#add offset to array
-		add $t2, $t2, $t3	#add offset to opcode
-
-		lb $t4, ($t1)
-		sb $t4, ($t2)
-
-		addi $t3, $t3, 1	#increment counter
-		beq $t3, 6, opcodePrinterEnd		
-		j opcodePrinterloop2
-
-
-opcodePrinterEnd:		
-		la $a0, opcode
-		li $v0, 4
-		syscall
-
-		lw $ra, ($sp)		#jump back
-		addi $sp, $sp, 4
-		jr $ra
-
 ############ - MANDY - TOKEN_TRANSLATOR - ###################################
 
  # Intializing program variables 
@@ -421,11 +292,8 @@ opcodePrinterEnd:
  	
 	#addi $t7, $t7, 0 	# intialize counter
 	la $a1, tokenBuffer 	# load address of token 
-<<<<<<< HEAD
 
 	#intialize arrays
-=======
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 	
 	# Concatenate characters
 	charCat:
@@ -445,26 +313,13 @@ opcodePrinterEnd:
 		# else, concatenate
 		addi $t7, $t7, 1	# increment char counter
 		sb $t6, ($a1)		# concatenate char
-<<<<<<< HEAD
 		 
-=======
-		#addi $a1, $a1, 1 	# update address
-
-		#la $a0, tokenBuffer
-		#li $v0, 4
-		#syscall
-		
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 		back:
 		move $s5, $zero		# Resets check - $s5 determines if the previous char was a colon: 
 		
 		lw $ra, ($sp)		#get return address
 		addi $sp, $sp, 4
-<<<<<<< HEAD
 		jr $ra			
-=======
-		jr $ra			# back to getChar
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 	
 	# Make the token 5 characters long to compare with registerArr elements
 	isSpace: 
@@ -480,12 +335,8 @@ opcodePrinterEnd:
 		move $t7, $zero		# clear counter
 		la $a1, tokenBuffer	# reset read/write location
 		beq $s5, 0, compare
-<<<<<<< HEAD
 		
 		#jr $ra
-=======
-	
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 		j back
 	
 	# Load address
@@ -525,20 +376,16 @@ opcodePrinterEnd:
 		lw $ra, 0($sp)		# reload original address
 		addi $sp, $sp, 4	# diffuse the stack
 		
-<<<<<<< HEAD
 		j back
-=======
-		jr $ra
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 
 	compare:
-		li $s1, 31				# Array Size ######### Pass
+		li $t0, 31 #t0				# Array Size ######### Pass
 		la $s2, registerArr			# Holds array address #### Pass
 		li $s5, 0				# iterator, keeps track of array index
-		li $s6, 6				# number of char per index in the array
-	
+		li $s6, 6				# number of char per index in the array ##### pass *****
+	 
 	comLoopA1:		
-		la $s3, 0($s2)				#load word2 address in $s3
+		la $s3, 0($s2)				#holds the comparision array - opcode or register a
 		li $t4, 0				#reset $t4 for element being compared to
 		li $t1, 0				#reset $t1 for element being compared to
 		li $t2, 0				#reset $t2 for element being compared to
@@ -556,10 +403,7 @@ opcodePrinterEnd:
 		j comLoopA2				# next iteration of loop
 		
 	equalPrint:	
-<<<<<<< HEAD
 		
-=======
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 		lb $a0, newLnChar				# add newline character
 		li $v0, 11
 		syscall
@@ -578,22 +422,12 @@ opcodePrinterEnd:
 		
 		lb $a0, spaceChar
 		
-<<<<<<< HEAD
 		j back
 		
-		#la $t9, rd		# Load address of label   ############# Pass
-		#li $t5, 5		##### Max number of chars ############# Pass
-		#j copyContents
-		
-=======
-		#lw $ra, ($sp)
-		j back
-		
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 	notEqual:	
-		beq $s5, $s1, notFound
+		beq $s5, $t0, notFound			# checks if we're at the last index element
 		addi $s5, $s5, 1			#increment iterator
-		addi $s2, $s2, 6			#incremement array address to access next element
+		addi $s2, $s2, 6			#incremement array address to access next element  #####
 		j comLoopA1
 	
 	#not found will find immediate values	
@@ -602,9 +436,5 @@ opcodePrinterEnd:
 		li $v0, 4
 		syscall
 		
-<<<<<<< HEAD
 		lb $a0, spaceChar
 		j back
-=======
-		j back
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
