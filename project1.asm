@@ -110,15 +110,14 @@ instruction: .asciiz "bne  "
 		syscall
 	
 		jal rLoopA		#REGISTER INSTRUCTION FORMAT
-
 		#jal jLoopA		#JUMP INSTRUCTION FORMAT
 		
 		la $a0, newLn		#print line break
-		li $v0, 3	
+		li $v0, 4	
 		syscall	
 		
 		addi $s7, $s7, 1	#increment the number of lines read
-		bge $s7, 3, end		#Number of lines to read
+		beq $s7, 2, end		#Number of lines to read
 		
 		j loop
 	
@@ -145,11 +144,11 @@ instruction: .asciiz "bne  "
 		
 		add $s0, $s0, $t3	#add to total number of iterations
 		move $s6, $s0
-		#jal prInt		#print number of iterations
 		
 		la $s6, newLn		#print a blank line
 		jal prStr
-	
+		
+		
 	rLoopB:	li $t3, 0		#store number of iterations for third operand
 	rLoopB1:	
 		la $a0, textSpace	#load address of string	
@@ -165,15 +164,12 @@ instruction: .asciiz "bne  "
 		addi $t3, $t3, 1	#increment counter
 		lb $s1, spaceChar
 		bne $a0, $s1, rLoopB1	#if character isn't a space, then repeat
-		
 
 		add $s0, $s0, $t3	#add to total number of iterations
 		move $s6, $s0		#move number of iterations to parameter register
-		#jal prInt		#print number of iterations
 		
 		la $s6, newLn		#print a blank line
 		jal prStr
-		
 		
 	rLoopC:	li $t3, 0		#store number of iterations for second operand
 	rLoopC1:	
@@ -193,14 +189,11 @@ instruction: .asciiz "bne  "
 		
 
 		add $s0, $s0, $t3	#add to total number of iterations
-		#move $s6, $s0		#move number of iterations to parameter register
-		#jal prInt		#print number of iterations
+		move $s6, $s0		#move number of iterations to parameter register
 		
-		lw $ra, ($sp)		#restore return address
+		lw $ra, 0($sp)		#restore return address
 		addi $sp, $sp, 4	#close stack
-		
 		jr $ra
-	
 		
 	#JUMP INSTRUCTION FORMAT
 	#Gets the label name
@@ -323,7 +316,7 @@ opcodePrinterEqualPrint:
 		syscall
 
 		move $a0, $s5
-		li $v0, 1
+		li $v0 1
 		syscall
 
 		j opcodePrinterGetBinary
@@ -403,6 +396,8 @@ opcodePrinterEnd:
  	
 	#addi $t7, $t7, 0 	# intialize counter
 	la $a1, tokenBuffer 	# load address of token 
+
+	#intialize arrays
 	
 	# Concatenate characters
 	charCat:
@@ -449,7 +444,8 @@ opcodePrinterEnd:
 		move $t7, $zero		# clear counter
 		la $a1, tokenBuffer	# reset read/write location
 		beq $s5, 0, compare
-	
+		
+		#jr $ra
 		j back
 	
 	# Load address
@@ -489,7 +485,7 @@ opcodePrinterEnd:
 		lw $ra, 0($sp)		# reload original address
 		addi $sp, $sp, 4	# diffuse the stack
 		
-		jr $ra
+		j back
 
 	compare:
 		li $s1, 31				# Array Size ######### Pass
@@ -516,6 +512,7 @@ opcodePrinterEnd:
 		j comLoopA2				# next iteration of loop
 		
 	equalPrint:	
+		
 		lb $a0, newLnChar				# add newline character
 		li $v0, 11
 		syscall
@@ -534,8 +531,11 @@ opcodePrinterEnd:
 		
 		lb $a0, spaceChar
 		
-		#lw $ra, ($sp)
 		j back
+		
+		#la $t9, rd		# Load address of label   ############# Pass
+		#li $t5, 5		##### Max number of chars ############# Pass
+		#j copyContents
 		
 	notEqual:	
 		beq $s5, $s1, notFound
@@ -549,4 +549,5 @@ opcodePrinterEnd:
 		li $v0, 4
 		syscall
 		
+		#jr $ra
 		j back
