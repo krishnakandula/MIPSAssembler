@@ -1,5 +1,5 @@
 .data
-		instruction: .asciiz "bne  "
+		instruction: .asciiz "sltiu"
 		instrucArr: .asciiz
 				"add  ", "addu ", "and  ", "jr   ", "nor  ", "or   ", "slt  ", "sltu ",
 		 		"sll  ", "srl  ", "sub  ", "subu ", "addi ", "addiu", "andi ", "beq  ",

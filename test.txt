@@ -1,3 +1,3 @@
-add $t1, $t2, $t2 
-#12345678901234567890 
-bgz $t2, $t0, label 
+add $t7, $s1, $a0 
+sub $t2, $a0, $s4 
+beq $t0, $v0, label 
