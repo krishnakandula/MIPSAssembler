@@ -3,7 +3,7 @@
 
 	# important characters
 	spaceChar: .byte ' '
-	newLnChar:	.byte '\n'
+	newLnChar: .byte '\n'
 	poundChar: .byte '#'
 	commaChar: .byte ','
 	nullTerm: .byte '\0'
@@ -101,7 +101,7 @@
 		la $a1, tokenBuffer	# reset read/write location
 		beq $s5, 0, compare
 		
-		jr $ra
+		j back
 	
 	# Load address
 	isLabel:
@@ -140,7 +140,7 @@
 		lw $ra, 0($sp)		# reload original address
 		addi $sp, $sp, 4	# diffuse the stack
 		
-		jr $ra
+		j back
 
 	compare:
 		li $s1, 31				# Array Size ######### Pass
@@ -191,7 +191,7 @@
 		li $v0, 11
 		syscall
 		
-		jr $ra
+		j back
 		
 		#la $t9, rd		# Load address of label   ############# Pass
 		#li $t5, 5		##### Max number of chars ############# Pass
@@ -209,7 +209,7 @@
 		li $v0, 4
 		syscall
 		
-		jr $ra
+		j back
 		
 		#la $t1, tokenBuffer	# Load address of tokenBuffer
 		#la $t9, immediate		# Load address of label   ############# Pass

@@ -1,7 +1,12 @@
 .data
+<<<<<<< HEAD
 		outFile:	.asciiz "output.txt"
 		instruction: 	.asciiz "j    "
 		array: .asciiz  
+=======
+		instruction: .asciiz "sltiu"
+		instrucArr: .asciiz
+>>>>>>> bc2fe09df1b876374626bc858d6f994230d72089
 				"add  ", "addu ", "and  ", "jr   ", "nor  ", "or   ", "slt  ", "sltu ",
 		 		"sll  ", "srl  ", "sub  ", "subu ", "addi ", "addiu", "andi ", "beq  ",
 		 		"bne  ", "lbu  ", "lhu  ", "ll   ", "lui  ", "lw   ", "slti ", "sltiu",

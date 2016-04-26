@@ -124,7 +124,11 @@ instruction: .asciiz "bne  "
 		syscall	
 		
 		addi $s7, $s7, 1	#increment the number of lines read
+<<<<<<< HEAD
 		beq $s7, 3, end		#Number of lines to read
+=======
+		beq $s7, 4, end		#Number of lines to read
+>>>>>>> bc2fe09df1b876374626bc858d6f994230d72089
 		
 		#addi $s0, $s0, 1	#Fixing the space address
 		j loop
@@ -200,11 +204,16 @@ instruction: .asciiz "bne  "
 		add $s0, $s0, $t3	#add to total number of iterations
 		move $s6, $s0		#move number of iterations to parameter register
 		
+<<<<<<< HEAD
 		
 		lw $ra, 0($sp)		#restore return address
 		addi $sp, $sp, 4	#close stack
 		li $t4, 0
 		li $t6, 0
+=======
+		lw $ra, 0($sp)		#restore return address
+		addi $sp, $sp, 4	#close stack
+>>>>>>> bc2fe09df1b876374626bc858d6f994230d72089
 		jr $ra
 		
 	#JUMP INSTRUCTION FORMAT
@@ -293,6 +302,7 @@ instruction: .asciiz "bne  "
 	#DETERMINES what instruction format to branch to
 	chkFormat:	
 
+<<<<<<< HEAD
 ############## - GET - OP - CODE - ##########################################
 
 	getOpCode:	addi $sp, $sp, -4
@@ -342,6 +352,8 @@ incrementStrIndex:	addi $t6, $t6, 1		#increment str index
 			
 			jr $ra
 			
+=======
+>>>>>>> bc2fe09df1b876374626bc858d6f994230d72089
 ############ - MANDY - TOKEN_TRANSLATOR - ###################################
 
  # Intializing program variables 
@@ -351,6 +363,8 @@ incrementStrIndex:	addi $t6, $t6, 1		#increment str index
  	
 	#addi $t7, $t7, 0 	# intialize counter
 	la $a1, tokenBuffer 	# load address of token 
+
+	#intialize arrays
 	
 	# Concatenate characters
 	charCat:
@@ -388,8 +402,52 @@ incrementStrIndex:	addi $t6, $t6, 1		#increment str index
 		move $t7, $zero		# clear counter
 		la $a1, tokenBuffer	# reset read/write location
 		beq $s5, 0, compare
+<<<<<<< HEAD
 		
 		#jr $ra
+=======
+		
+		#jr $ra
+		j back
+	
+	# Load address
+	isLabel:
+		li $s5, 1		# sets the isColon flag to 1
+	
+		addi $sp, $sp, -4	# create stack
+		sw $ra, 0($sp)		# store in original $ra
+		
+		jal isSpace		# add spaces to align
+		
+		la $t1, tokenBuffer	# Load address of tokenBuffer
+		li $t3, 0		# char counter
+		la $t2, label		# Load address of label   ############# Pass
+		li $t5, 5		##### Max number of chars ############# Pass
+	
+	copLabel:
+		lb  $t4, 0($t1) 	# load byte in $t4 from tokenBuffer
+		sb $t4, 0($t2)		# store byte into label
+		addi $t3, $t3, 1	# increment counter
+		addi $t1, $t1, 1	# increment read address of tokenBuffer
+		addi $t2, $t2, 1	# increment writee address of label
+		bne $t3, $t5, copLabel 	# stop loop if we get to 5 chars
+		
+		la $a0, labelStr
+		li $v0, 4
+		syscall
+		
+		la $a0, label		#print
+		li $v0, 4
+		syscall
+		
+		lb $a0, newLnChar	# add newline character
+		li $v0, 11
+		syscall
+		
+		lw $ra, 0($sp)		# reload original address
+		addi $sp, $sp, 4	# diffuse the stack
+		
+>>>>>>> bc2fe09df1b876374626bc858d6f994230d72089
 		j back
 
 	compare:
@@ -451,5 +509,9 @@ incrementStrIndex:	addi $t6, $t6, 1		#increment str index
 		syscall
 		
 		lb $a0, spaceChar
+<<<<<<< HEAD
 		j back
 		
+=======
+		j back
+>>>>>>> bc2fe09df1b876374626bc858d6f994230d72089
