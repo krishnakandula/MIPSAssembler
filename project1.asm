@@ -99,6 +99,8 @@ instruction: .asciiz "bne  "
 		li $v0, 11		#syscall 11 - print character
 		syscall
 		
+		move $t6, $a0
+		
 		move $s6, $s0		#move iteration # to $s6 for parameter
 		addi $s0, $s0, 1	#increment counter
 		
@@ -117,7 +119,7 @@ instruction: .asciiz "bne  "
 		syscall	
 		
 		addi $s7, $s7, 1	#increment the number of lines read
-		beq $s7, 3, end		#Number of lines to read
+		beq $s7, 1, end		#Number of lines to read
 		
 		j loop
 	
