@@ -99,6 +99,8 @@ instruction: .asciiz "bne  "
 		li $v0, 11		#syscall 11 - print character
 		syscall
 		
+		move $t6, $a0
+		
 		move $s6, $s0		#move iteration # to $s6 for parameter
 		addi $s0, $s0, 1	#increment counter
 		
@@ -110,15 +112,14 @@ instruction: .asciiz "bne  "
 		syscall
 	
 		jal rLoopA		#REGISTER INSTRUCTION FORMAT
-
 		#jal jLoopA		#JUMP INSTRUCTION FORMAT
 		
 		la $a0, newLn		#print line break
-		li $v0, 3	
+		li $v0, 4	
 		syscall	
 		
 		addi $s7, $s7, 1	#increment the number of lines read
-		bge $s7, 3, end		#Number of lines to read
+		beq $s7, 1, end		#Number of lines to read
 		
 		j loop
 	
@@ -145,19 +146,11 @@ instruction: .asciiz "bne  "
 		
 		add $s0, $s0, $t3	#add to total number of iterations
 		move $s6, $s0
-<<<<<<< HEAD
 		
 		la $s6, newLn		#print a blank line
 		jal prStr
 		
 		
-=======
-		#jal prInt		#print number of iterations
-		
-		la $s6, newLn		#print a blank line
-		jal prStr
-	
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 	rLoopB:	li $t3, 0		#store number of iterations for third operand
 	rLoopB1:	
 		la $a0, textSpace	#load address of string	
@@ -176,14 +169,9 @@ instruction: .asciiz "bne  "
 
 		add $s0, $s0, $t3	#add to total number of iterations
 		move $s6, $s0		#move number of iterations to parameter register
-<<<<<<< HEAD
-=======
-		#jal prInt		#print number of iterations
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 		
 		la $s6, newLn		#print a blank line
 		jal prStr
-		
 		
 	rLoopC:	li $t3, 0		#store number of iterations for second operand
 	rLoopC1:	
@@ -203,18 +191,11 @@ instruction: .asciiz "bne  "
 		
 
 		add $s0, $s0, $t3	#add to total number of iterations
-<<<<<<< HEAD
 		move $s6, $s0		#move number of iterations to parameter register
-=======
-		#move $s6, $s0		#move number of iterations to parameter register
-		#jal prInt		#print number of iterations
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 		
-		lw $ra, ($sp)		#restore return address
+		lw $ra, 0($sp)		#restore return address
 		addi $sp, $sp, 4	#close stack
-		
 		jr $ra
-	
 		
 	#JUMP INSTRUCTION FORMAT
 	#Gets the label name
@@ -337,11 +318,7 @@ opcodePrinterEqualPrint:
 		syscall
 
 		move $a0, $s5
-<<<<<<< HEAD
 		li $v0 1
-=======
-		li $v0, 1
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 		syscall
 
 		j opcodePrinterGetBinary
@@ -421,11 +398,8 @@ opcodePrinterEnd:
  	
 	#addi $t7, $t7, 0 	# intialize counter
 	la $a1, tokenBuffer 	# load address of token 
-<<<<<<< HEAD
 
 	#intialize arrays
-=======
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 	
 	# Concatenate characters
 	charCat:
@@ -445,26 +419,18 @@ opcodePrinterEnd:
 		# else, concatenate
 		addi $t7, $t7, 1	# increment char counter
 		sb $t6, ($a1)		# concatenate char
-<<<<<<< HEAD
-		 
-=======
 		#addi $a1, $a1, 1 	# update address
 
 		#la $a0, tokenBuffer
 		#li $v0, 4
 		#syscall
 		
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 		back:
 		move $s5, $zero		# Resets check - $s5 determines if the previous char was a colon: 
 		
 		lw $ra, ($sp)		#get return address
 		addi $sp, $sp, 4
-<<<<<<< HEAD
-		jr $ra			
-=======
 		jr $ra			# back to getChar
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 	
 	# Make the token 5 characters long to compare with registerArr elements
 	isSpace: 
@@ -480,12 +446,8 @@ opcodePrinterEnd:
 		move $t7, $zero		# clear counter
 		la $a1, tokenBuffer	# reset read/write location
 		beq $s5, 0, compare
-<<<<<<< HEAD
 		
 		#jr $ra
-=======
-	
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 		j back
 	
 	# Load address
@@ -525,11 +487,7 @@ opcodePrinterEnd:
 		lw $ra, 0($sp)		# reload original address
 		addi $sp, $sp, 4	# diffuse the stack
 		
-<<<<<<< HEAD
 		j back
-=======
-		jr $ra
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 
 	compare:
 		li $s1, 31				# Array Size ######### Pass
@@ -556,10 +514,7 @@ opcodePrinterEnd:
 		j comLoopA2				# next iteration of loop
 		
 	equalPrint:	
-<<<<<<< HEAD
 		
-=======
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 		lb $a0, newLnChar				# add newline character
 		li $v0, 11
 		syscall
@@ -578,18 +533,12 @@ opcodePrinterEnd:
 		
 		lb $a0, spaceChar
 		
-<<<<<<< HEAD
 		j back
 		
 		#la $t9, rd		# Load address of label   ############# Pass
 		#li $t5, 5		##### Max number of chars ############# Pass
 		#j copyContents
 		
-=======
-		#lw $ra, ($sp)
-		j back
-		
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
 	notEqual:	
 		beq $s5, $s1, notFound
 		addi $s5, $s5, 1			#increment iterator
@@ -602,9 +551,5 @@ opcodePrinterEnd:
 		li $v0, 4
 		syscall
 		
-<<<<<<< HEAD
-		lb $a0, spaceChar
+		#jr $ra
 		j back
-=======
-		j back
->>>>>>> 93712e71f06894f3a3292f066d83229d2a94958c
