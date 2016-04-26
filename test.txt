@@ -1,9 +1,4 @@
 add $t7, $s1, $a0 
-<<<<<<< HEAD
 addi $t2, $a0, $s4 
-mul $t4, $a0, $s2 
-=======
-sub $t2, $a0, $s4 
-beq $t0, $v0, label 
-mul $t4, $a0, $s2 
->>>>>>> bc2fe09df1b876374626bc858d6f994230d72089
+nor $t4, $a0, $s2 
+#01234567890123456789
