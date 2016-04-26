@@ -117,7 +117,7 @@ instruction: .asciiz "bne  "
 		syscall	
 		
 		addi $s7, $s7, 1	#increment the number of lines read
-		beq $s7, 2, end		#Number of lines to read
+		beq $s7, 3, end		#Number of lines to read
 		
 		j loop
 	
